@@ -17,6 +17,9 @@ docker run -d --name clickhouse-server -p 9000:9000 --ulimit nofile=262144:26214
 docker run -it --rm --link clickhouse-server:clickhouse-server yandex/clickhouse-client  --host clickhouse-server
 ```
 
+Now you can see if it success setup or not.
+
+
 ## Cluster
 
 
@@ -163,11 +166,86 @@ Lets see config file.
     <include_from>/etc/clickhouse-server/metrika.xml</include_from>
 ```
 
+So that we can put out our cluster settings in metrika.xml.
+
+
 Also we need to set mocros for identifying shard and replica - it will be used on table creation.
+(I already put it in metrika.xml)
 
 ```
 <macros>
     <shard>01</shard>
     <replica>01</replica>
 </macros>
+```
+
+So lets see metrika.xml
+
+
+```
+<yandex>
+	<clickhouse_remote_servers>
+		<cluster_person>
+			<shard>
+				<replica>
+					<host>clickhouse-01</host>
+					<port>9000</port>
+				</replica>
+				<replica>
+					<host>clickhouse-02</host>
+					<port>9000</port>
+				</replica>
+			</shard>
+			<shard>
+				<replica>
+					<host>clickhouse-03</host>
+					<port>9000</port>
+				</replica>
+				<replica>
+					<host>clickhouse-04</host>
+					<port>9000</port>
+				</replica>
+			</shard>
+			<shard>
+				<replica>
+					<host>clickhouse-05</host>
+					<port>9000</port>
+				</replica>
+				<replica>
+					<host>clickhouse-06</host>
+					<port>9000</port>
+				</replica>
+			</shard>
+		</cluster_person>
+	</clickhouse_remote_servers>
+        <zookeeper-servers>
+            <node index="1">
+                <host>clickhouse-zookeeper</host>
+                <port>2181</port>
+            </node>
+        </zookeeper-servers>
+        <macros>
+            <shard>01</shard>
+            <replica>01</replica>
+        </macros>
+</yandex>
+```
+
+We setup 3 shards, each shard has two replica server.
+
+So now you can start the server.
+
+```
+docker network create clickhouse-net
+docker-compose up -d
+```
+
+Conn to server and see if the cluster settings fine;
+
+```
+docker run -it --rm --network="clickhouse-net" --link clickhouse-01:clickhouse-server yandex/clickhouse-client --host clickhouse-server
+```
+
+```sql
+select * from system.clusters;
 ```
