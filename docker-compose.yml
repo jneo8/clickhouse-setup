@@ -1,0 +1,116 @@
+version: '3'
+
+services:
+    clickhouse-zookeeper:
+        image: zookeeper
+        ports:
+            - "2181:2181"
+            - "2182:2182"
+        container_name: clickhouse-zookeeper
+        hostname: clickhouse-zookeeper
+
+    clickhouse-01:
+        image: yandex/clickhouse-server
+        hostname: clickhouse-01
+        container_name: clickhouse-01
+        ports:
+            - 9001:9000
+        volumes:
+                - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
+                - ./config/clickhouse_metrika.xml:/etc/clickhouse-server/metrika.xml
+                - ./data/server-01:/var/lib/clickhouse
+        ulimits:
+            nofile:
+                soft: 262144
+                hard: 262144
+        depends_on:
+            - "clickhouse-zookeeper"
+
+    clickhouse-02:
+        image: yandex/clickhouse-server
+        hostname: clickhouse-02
+        container_name: clickhouse-02
+        ports:
+            - 9002:9000
+        volumes:
+                - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
+                - ./config/clickhouse_metrika.xml:/etc/clickhouse-server/metrika.xml
+                - ./data/server-02:/var/lib/clickhouse
+        ulimits:
+            nofile:
+                soft: 262144
+                hard: 262144
+        depends_on:
+            - "clickhouse-zookeeper"
+
+    clickhouse-03:
+        image: yandex/clickhouse-server
+        hostname: clickhouse-03
+        container_name: clickhouse-03
+        ports:
+            - 9003:9000
+        volumes:
+                - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
+                - ./config/clickhouse_metrika.xml:/etc/clickhouse-server/metrika.xml
+                - ./data/server-03:/var/lib/clickhouse
+        ulimits:
+            nofile:
+                soft: 262144
+                hard: 262144
+        depends_on:
+            - "clickhouse-zookeeper"
+
+    clickhouse-04:
+        image: yandex/clickhouse-server
+        hostname: clickhouse-04
+        container_name: clickhouse-04
+        ports:
+            - 9004:9000
+        volumes:
+                - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
+                - ./config/clickhouse_metrika.xml:/etc/clickhouse-server/metrika.xml
+                - ./data/server-04:/var/lib/clickhouse
+        ulimits:
+            nofile:
+                soft: 262144
+                hard: 262144
+        depends_on:
+            - "clickhouse-zookeeper"
+
+    clickhouse-05:
+        image: yandex/clickhouse-server
+        hostname: clickhouse-05
+        container_name: clickhouse-05
+        ports:
+            - 9005:9000
+        volumes:
+                - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
+                - ./config/clickhouse_metrika.xml:/etc/clickhouse-server/metrika.xml
+                - ./data/server-05:/var/lib/clickhouse
+        ulimits:
+            nofile:
+                soft: 262144
+                hard: 262144
+        depends_on:
+            - "clickhouse-zookeeper"
+
+    clickhouse-06:
+        image: yandex/clickhouse-server
+        hostname: clickhouse-06
+        container_name: clickhouse-06
+        ports:
+            - 9006:9000
+        volumes:
+                - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
+                - ./config/clickhouse_metrika.xml:/etc/clickhouse-server/metrika.xml
+                - ./data/server-06:/var/lib/clickhouse
+        ulimits:
+            nofile:
+                soft: 262144
+                hard: 262144
+        depends_on:
+            - "clickhouse-zookeeper"
+networks:
+    default:
+        external:
+            name: clickhouse-net
