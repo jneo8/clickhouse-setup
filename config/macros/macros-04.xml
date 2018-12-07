@@ -1,3 +1,5 @@
 <yandex>
     <replica>clickhouse-04</replica>
+    <shard>03</shard>
+    <layer>01</layer>
 </yandex>
