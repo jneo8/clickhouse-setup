@@ -249,3 +249,21 @@ docker run -it --rm --network="clickhouse-net" --link clickhouse-01:clickhouse-s
 ```sql
 select * from system.clusters;
 ```
+
+```
+SELECT *
+FROM system.clusters 
+
+┌─cluster─────────────────────┬─shard_num─┬─shard_weight─┬─replica_num─┬─host_name─────┬─host_address─┬─port─┬─is_local─┬─user────┬─default_database─┐
+│ cluster_person              │         1 │            1 │           1 │ clickhouse-01 │ 172.21.0.4   │ 9000 │        1 │ default │                  │
+│ cluster_person              │         1 │            1 │           2 │ clickhouse-02 │ 172.21.0.6   │ 9000 │        1 │ default │                  │
+│ cluster_person              │         2 │            1 │           1 │ clickhouse-03 │ 172.21.0.7   │ 9000 │        0 │ default │                  │
+│ cluster_person              │         2 │            1 │           2 │ clickhouse-04 │ 172.21.0.8   │ 9000 │        0 │ default │                  │
+│ cluster_person              │         3 │            1 │           1 │ clickhouse-05 │ 172.21.0.3   │ 9000 │        0 │ default │                  │
+│ cluster_person              │         3 │            1 │           2 │ clickhouse-06 │ 172.21.0.5   │ 9000 │        0 │ default │                  │
+│ test_shard_localhost        │         1 │            1 │           1 │ localhost     │ 127.0.0.1    │ 9000 │        1 │ default │                  │
+│ test_shard_localhost_secure │         1 │            1 │           1 │ localhost     │ 127.0.0.1    │ 9440 │        0 │ default │                  │
+└─────────────────────────────┴───────────┴──────────────┴─────────────┴───────────────┴──────────────┴──────┴──────────┴─────────┴──────────────────┘
+
+8 rows in set. Elapsed: 0.003 sec. 
+```
