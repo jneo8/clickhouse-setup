@@ -308,6 +308,29 @@ and Create Distributed Table conn to local table
 CREATE TABLE ttt_all as ttt ENGINE = Distributed(cluster_1, default, ttt, rand());
 ```
 
+
+### Insert and test
+
+gen some data and test.
+
+
+```
+# docker exec into client server 1 and
+for ((idx=1;idx<=100;++idx)); do clickhouse-client --host clickhouse-server --query "Insert into default.ttt_all values ($idx)"; done;
+```
+
+For Distributed table.
+
+```
+select count(*) from ttt_all;
+```
+
+For loacl table.
+
+```
+select count(*) from ttt;
+```
+
 ## Source
 
 - https://clickhouse.yandex/docs/en/operations/table_engines/replication/#creating-replicated-tables
