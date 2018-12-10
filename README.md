@@ -166,8 +166,6 @@ Lets see config file.
     <include_from>/etc/clickhouse-server/metrika.xml</include_from>
 ```
 
-So that we can put out our cluster settings in metrika.xml.
-
 
 So lets see `metrika.xml`
 
@@ -233,7 +231,7 @@ So lets see `metrika.xml`
 </yandex>
 ```
 
-and macros.xml, each instances has it's own macros, like server 1: 
+and macros.xml, each instances has there own macros settings, like server 1: 
 
 ```
 <yandex>
@@ -244,6 +242,9 @@ and macros.xml, each instances has it's own macros, like server 1:
     </macros>
 </yandex>
 ```
+
+
+**Make sure your macros settings is equal to remote server settings in metrika.xml**
 
 We setup 3 shards, each shard has two replica server.
 
