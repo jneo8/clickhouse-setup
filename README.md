@@ -331,6 +331,17 @@ For loacl table.
 select count(*) from ttt;
 ```
 
+
+## Authentication
+
+Please see config/users.xml
+
+
+- Conn
+```bash
+docker run -it --rm --network="clickhouse-net" --link clickhouse-01:clickhouse-server yandex/clickhouse-client --host clickhouse-server -u user1 --password 123456
+```
+
 ## Source
 
 - https://clickhouse.yandex/docs/en/operations/table_engines/replication/#creating-replicated-tables

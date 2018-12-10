@@ -17,3 +17,5 @@ run-cluster-client-5:
 run-cluster-client-6:
 	docker run -it --rm --network="clickhouse-net" --link clickhouse-06:clickhouse-server yandex/clickhouse-client --host clickhouse-server
 
+run-cluster-client-1-auth:
+	docker run -it --rm --network="clickhouse-net" --link clickhouse-01:clickhouse-server yandex/clickhouse-client --host clickhouse-server -u user1 --password 123456
