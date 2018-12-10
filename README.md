@@ -155,7 +155,7 @@ We create 6 clickhouse server and one zookeeper container.
 
 Lets see config file.
 
-`./config/clickhouse_config.xml` is the default config file in docker, we copy it out and add
+`./config/clickhouse_config.xml` is the default config file in docker, we copy it out and add this line
 
 
 ```
@@ -169,46 +169,17 @@ Lets see config file.
 So that we can put out our cluster settings in metrika.xml.
 
 
-Also we need to set mocros for identifying shard and replica - it will be used on table creation.
-(I already put it in metrika.xml)
-
-```
-<macros>
-    <shard>01</shard>
-    <replica>01</replica>
-</macros>
-```
-
-So lets see metrika.xml
-
+So lets see `metrika.xml`
 
 ```
 <yandex>
 	<clickhouse_remote_servers>
-		<cluster_person>
+		<cluster_1>
 			<shard>
+                                <weight>1</weight>
+                                <internal_replication>true</internal_replication>
 				<replica>
 					<host>clickhouse-01</host>
-					<port>9000</port>
-				</replica>
-				<replica>
-					<host>clickhouse-02</host>
-					<port>9000</port>
-				</replica>
-			</shard>
-			<shard>
-				<replica>
-					<host>clickhouse-03</host>
-					<port>9000</port>
-				</replica>
-				<replica>
-					<host>clickhouse-04</host>
-					<port>9000</port>
-				</replica>
-			</shard>
-			<shard>
-				<replica>
-					<host>clickhouse-05</host>
 					<port>9000</port>
 				</replica>
 				<replica>
@@ -216,7 +187,32 @@ So lets see metrika.xml
 					<port>9000</port>
 				</replica>
 			</shard>
-		</cluster_person>
+			<shard>
+                                <weight>1</weight>
+                                <internal_replication>true</internal_replication>
+				<replica>
+					<host>clickhouse-02</host>
+					<port>9000</port>
+				</replica>
+				<replica>
+					<host>clickhouse-03</host>
+					<port>9000</port>
+				</replica>
+			</shard>
+			<shard>
+                                <weight>1</weight>
+                                <internal_replication>true</internal_replication>
+
+				<replica>
+					<host>clickhouse-04</host>
+					<port>9000</port>
+				</replica>
+				<replica>
+					<host>clickhouse-05</host>
+					<port>9000</port>
+				</replica>
+			</shard>
+		</cluster_1>
 	</clickhouse_remote_servers>
         <zookeeper-servers>
             <node index="1">
@@ -224,10 +220,28 @@ So lets see metrika.xml
                 <port>2181</port>
             </node>
         </zookeeper-servers>
-        <macros>
-            <shard>01</shard>
-            <replica>01</replica>
-        </macros>
+        <networks>
+            <ip>::/0</ip>
+        </networks>
+        <clickhouse_compression>
+            <case>
+                <min_part_size>10000000000</min_part_size>
+                <min_part_size_ratio>0.01</min_part_size_ratio>
+                <method>lz4</method>
+            </case>
+        </clickhouse_compression>
+</yandex>
+```
+
+and macros.xml, each instances has it's own macros, like server 1: 
+
+```
+<yandex>
+    <macros>
+        <replica>clickhouse-01</replica>
+        <shard>01</shard>
+        <layer>01</layer>
+    </macros>
 </yandex>
 ```
 
@@ -247,23 +261,21 @@ docker run -it --rm --network="clickhouse-net" --link clickhouse-01:clickhouse-s
 ```
 
 ```sql
-select * from system.clusters;
-```
+clickhouse-01 :) select * from system.clusters;
 
-```
 SELECT *
 FROM system.clusters 
 
 ┌─cluster─────────────────────┬─shard_num─┬─shard_weight─┬─replica_num─┬─host_name─────┬─host_address─┬─port─┬─is_local─┬─user────┬─default_database─┐
-│ cluster_person              │         1 │            1 │           1 │ clickhouse-01 │ 172.21.0.4   │ 9000 │        1 │ default │                  │
-│ cluster_person              │         1 │            1 │           2 │ clickhouse-02 │ 172.21.0.6   │ 9000 │        1 │ default │                  │
-│ cluster_person              │         2 │            1 │           1 │ clickhouse-03 │ 172.21.0.7   │ 9000 │        0 │ default │                  │
-│ cluster_person              │         2 │            1 │           2 │ clickhouse-04 │ 172.21.0.8   │ 9000 │        0 │ default │                  │
-│ cluster_person              │         3 │            1 │           1 │ clickhouse-05 │ 172.21.0.3   │ 9000 │        0 │ default │                  │
-│ cluster_person              │         3 │            1 │           2 │ clickhouse-06 │ 172.21.0.5   │ 9000 │        0 │ default │                  │
+│ cluster_1                   │         1 │            1 │           1 │ clickhouse-01 │ 172.21.0.4   │ 9000 │        1 │ default │                  │
+│ cluster_1                   │         1 │            1 │           2 │ clickhouse-06 │ 172.21.0.5   │ 9000 │        1 │ default │                  │
+│ cluster_1                   │         2 │            1 │           1 │ clickhouse-02 │ 172.21.0.8   │ 9000 │        0 │ default │                  │
+│ cluster_1                   │         2 │            1 │           2 │ clickhouse-03 │ 172.21.0.6   │ 9000 │        0 │ default │                  │
+│ cluster_1                   │         3 │            1 │           1 │ clickhouse-04 │ 172.21.0.7   │ 9000 │        0 │ default │                  │
+│ cluster_1                   │         3 │            1 │           2 │ clickhouse-05 │ 172.21.0.3   │ 9000 │        0 │ default │                  │
 │ test_shard_localhost        │         1 │            1 │           1 │ localhost     │ 127.0.0.1    │ 9000 │        1 │ default │                  │
 │ test_shard_localhost_secure │         1 │            1 │           1 │ localhost     │ 127.0.0.1    │ 9440 │        0 │ default │                  │
 └─────────────────────────────┴───────────┴──────────────┴─────────────┴───────────────┴──────────────┴──────┴──────────┴─────────┴──────────────────┘
-
-8 rows in set. Elapsed: 0.003 sec. 
 ```
+
+If you see this, it means cluster's settings work well(but not conn fine).
