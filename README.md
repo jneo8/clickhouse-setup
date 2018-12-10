@@ -20,11 +20,19 @@ docker run -it --rm --link clickhouse-server:clickhouse-server yandex/clickhouse
 Now you can see if it success setup or not.
 
 
-## Cluster
+## Setup Cluster
 
 
-For cluster, let's see docker-compose.yml first.
+This part we will setup
 
+- 1 cluster, with 3 shards
+- Each shard has 2 replica server
+- Use ReplicatedMergeTree & Distributed table to setup our table.
+
+
+### Cluster
+
+Let's see our docker-compose.yml first.
 
 ```
 version: '3'
@@ -47,7 +55,8 @@ services:
         volumes:
                 - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
                 - ./config/clickhouse_metrika.xml:/etc/clickhouse-server/metrika.xml
-                - ./data/server-01:/var/lib/clickhouse
+                - ./config/macros/macros-01.xml:/etc/clickhouse-server/config.d/macros.xml
+                # - ./data/server-01:/var/lib/clickhouse
         ulimits:
             nofile:
                 soft: 262144
@@ -64,7 +73,8 @@ services:
         volumes:
                 - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
                 - ./config/clickhouse_metrika.xml:/etc/clickhouse-server/metrika.xml
-                - ./data/server-02:/var/lib/clickhouse
+                - ./config/macros/macros-02.xml:/etc/clickhouse-server/config.d/macros.xml
+                # - ./data/server-02:/var/lib/clickhouse
         ulimits:
             nofile:
                 soft: 262144
@@ -81,7 +91,8 @@ services:
         volumes:
                 - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
                 - ./config/clickhouse_metrika.xml:/etc/clickhouse-server/metrika.xml
-                - ./data/server-03:/var/lib/clickhouse
+                - ./config/macros/macros-03.xml:/etc/clickhouse-server/config.d/macros.xml
+                # - ./data/server-03:/var/lib/clickhouse
         ulimits:
             nofile:
                 soft: 262144
@@ -98,7 +109,8 @@ services:
         volumes:
                 - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
                 - ./config/clickhouse_metrika.xml:/etc/clickhouse-server/metrika.xml
-                - ./data/server-04:/var/lib/clickhouse
+                - ./config/macros/macros-04.xml:/etc/clickhouse-server/config.d/macros.xml
+                # - ./data/server-04:/var/lib/clickhouse
         ulimits:
             nofile:
                 soft: 262144
@@ -115,7 +127,8 @@ services:
         volumes:
                 - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
                 - ./config/clickhouse_metrika.xml:/etc/clickhouse-server/metrika.xml
-                - ./data/server-05:/var/lib/clickhouse
+                - ./config/macros/macros-05.xml:/etc/clickhouse-server/config.d/macros.xml
+                # - ./data/server-05:/var/lib/clickhouse
         ulimits:
             nofile:
                 soft: 262144
@@ -132,7 +145,8 @@ services:
         volumes:
                 - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
                 - ./config/clickhouse_metrika.xml:/etc/clickhouse-server/metrika.xml
-                - ./data/server-06:/var/lib/clickhouse
+                - ./config/macros/macros-06.xml:/etc/clickhouse-server/config.d/macros.xml
+                # - ./data/server-06:/var/lib/clickhouse
         ulimits:
             nofile:
                 soft: 262144
@@ -145,7 +159,8 @@ networks:
             name: clickhouse-net
 ```
 
-We create 6 clickhouse server and one zookeeper container.
+
+We have 6 clickhouse server container and one zookeeper container.
 
 
 **To enable replication ZooKeeper is required. ClickHouse will take care of data consistency on all replicas and run restore procedure after failure automatically. It's recommended to deploy ZooKeeper cluster to separate servers.**
@@ -153,10 +168,9 @@ We create 6 clickhouse server and one zookeeper container.
 **ZooKeeper is not a requirement — in some simple cases you can duplicate the data by writing it into all the replicas from your application code. This approach is not recommended — in this case ClickHouse is not able to guarantee data consistency on all replicas. This remains the responsibility of your application.**
 
 
-Lets see config file.
+Let's see config file.
 
 `./config/clickhouse_config.xml` is the default config file in docker, we copy it out and add this line
-
 
 ```
     <!-- If element has 'incl' attribute, then for it's value will be used corresponding substitution from another file.
@@ -246,8 +260,6 @@ and macros.xml, each instances has there own macros settings, like server 1:
 
 **Make sure your macros settings is equal to remote server settings in metrika.xml**
 
-We setup 3 shards, each shard has two replica server.
-
 So now you can start the server.
 
 ```
@@ -280,3 +292,22 @@ FROM system.clusters
 ```
 
 If you see this, it means cluster's settings work well(but not conn fine).
+
+
+### Replica Table
+
+So now we have a cluster and replica settings. For clickhouse, we need to create ReplicatedMergeTree Table as a local table in every server.
+
+```sql
+CREATE TABLE ttt (id Int32) ENGINE = ReplicatedMergeTree('/clickhouse/tables/{layer}-{shard}/ttt', '{replica}') PARTITION BY id ORDER BY id
+```
+
+and Create Distributed Table conn to local table
+
+```sql
+CREATE TABLE ttt_all as ttt ENGINE = Distributed(cluster_1, default, ttt, rand());
+```
+
+## Source
+
+- https://clickhouse.yandex/docs/en/operations/table_engines/replication/#creating-replicated-tables
