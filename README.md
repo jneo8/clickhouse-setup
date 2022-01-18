@@ -1,25 +1,6 @@
 # Tutorial for set up clickhouse server
 
 
-## Single server with docker
-
-
-- Run server
-
-```
-docker run -d --name clickhouse-server -p 9000:9000 --ulimit nofile=262144:262144 yandex/clickhouse-server
-
-```
-
-- Run client
-
-```
-docker run -it --rm --link clickhouse-server:clickhouse-server yandex/clickhouse-client  --host clickhouse-server
-```
-
-Now you can see if it success setup or not.
-
-
 ## Setup Cluster
 
 
@@ -28,7 +9,6 @@ This part we will setup
 - 2 clusters, with 2 shards
 - Each shard has 2 replica server
 - Each cluster has its own query node
-- Use ReplicatedMergeTree & Distributed table to setup our table.
 
 
 ### Cluster
