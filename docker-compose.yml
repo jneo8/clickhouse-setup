@@ -11,7 +11,7 @@ services:
 
     # cluster_old
     clickhouse-01:
-        image: yandex/clickhouse-server:20.3
+        image: yandex/clickhouse-server:20.7
         hostname: clickhouse-01
         container_name: clickhouse-01
         ports:
@@ -32,7 +32,7 @@ services:
 
     # cluster_old
     clickhouse-02:
-        image: yandex/clickhouse-server:20.3
+        image: yandex/clickhouse-server:20.7
         hostname: clickhouse-02
         container_name: clickhouse-02
         ports:
@@ -95,7 +95,7 @@ services:
 
     # query_old
     query-old:
-        image: yandex/clickhouse-server:20.3
+        image: yandex/clickhouse-server:20.7
         hostname: query-old
         container_name: query-old
         ports:
