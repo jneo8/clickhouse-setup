@@ -7,6 +7,7 @@
         <errorlog>/var/log/clickhouse-server/clickhouse-server.err.log</errorlog>
         <size>1000M</size>
         <count>10</count>
+        <console>1</console>
         <!-- <console>1</console> --> <!-- Default behavior is autodetection (log to console if not daemon mode and is tty) -->
     </logger>
     <!--display_name>production</display_name--> <!-- It is the name that will be shown in the client -->
@@ -256,6 +257,10 @@
         <!-- Interval of flushing data. -->
         <flush_interval_milliseconds>7500</flush_interval_milliseconds>
     </query_log>
+    <asynchronous_metrics_update_period_s>60</asynchronous_metrics_update_period_s>
+    <asynchronous_metric_log>
+        <flush_interval_milliseconds>60000</flush_interval_milliseconds>
+    </asynchronous_metric_log>
 
 
     <!-- Uncomment if use part_log
@@ -313,9 +318,10 @@
     </distributed_ddl>
 
     <!-- Settings to fine tune MergeTree tables. See documentation in source code, in MergeTreeSettings.h -->
-    <!--
     <merge_tree>
         <max_suspicious_broken_parts>5</max_suspicious_broken_parts>
+        <prefer_fetch_merged_part_time_threshold>1</prefer_fetch_merged_part_time_threshold>
+        <prefer_fetch_merged_part_size_threshold>1</prefer_fetch_merged_part_size_threshold>
     </merge_tree>
     -->
 
@@ -368,4 +374,3 @@
     <!-- Uncomment to disable ClickHouse internal DNS caching. -->
     <!-- <disable_internal_dns_cache>1</disable_internal_dns_cache> -->
 </yandex>
-
