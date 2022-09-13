@@ -7,7 +7,7 @@
 This part we will setup
 
 - 2 clusters, with 2 shards
-- Each shard has 2 replica server
+- Each shard has 3 replica server
 - Each cluster has its own query node
 
 
