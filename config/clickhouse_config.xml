@@ -7,7 +7,7 @@
         <errorlog>/var/log/clickhouse-server/clickhouse-server.err.log</errorlog>
         <size>1000M</size>
         <count>10</count>
-        <!-- <console>1</console> --> <!-- Default behavior is autodetection (log to console if not daemon mode and is tty) -->
+        <console>1</console>
     </logger>
     <!--display_name>production</display_name--> <!-- It is the name that will be shown in the client -->
     <http_port>8123</http_port>
@@ -368,4 +368,3 @@
     <!-- Uncomment to disable ClickHouse internal DNS caching. -->
     <!-- <disable_internal_dns_cache>1</disable_internal_dns_cache> -->
 </yandex>
-
