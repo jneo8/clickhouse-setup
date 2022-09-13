@@ -19,17 +19,25 @@ Let's see our docker-compose.yml first.
 version: '3'
 
 services:
-    clickhouse-zookeeper:
+    clickhouse-zookeeper-01:
         image: zookeeper
         ports:
             - "2181:2181"
             - "2182:2182"
-        container_name: clickhouse-zookeeper
-        hostname: clickhouse-zookeeper
+        container_name: clickhouse-zookeeper-01
+        hostname: clickhouse-zookeeper-01
+	
+    clickhouse-zookeeper-02:
+        image: zookeeper
+        ports:
+            - "2281:2181"
+            - "2282:2182"
+        container_name: clickhouse-zookeeper-02
+        hostname: clickhouse-zookeeper-02
 
     # cluster_old
     clickhouse-01:
-        image: yandex/clickhouse-server:20.3
+        image: yandex/clickhouse-server:20.7
         hostname: clickhouse-01
         container_name: clickhouse-01
         ports:
@@ -46,11 +54,32 @@ services:
                 soft: 262144
                 hard: 262144
         depends_on:
-            - "clickhouse-zookeeper"
+            - "clickhouse-zookeeper-01"
+	    
+    # cluster_old
+    clickhouse-01-replica:
+        image: yandex/clickhouse-server:20.7
+        hostname: clickhouse-01-replica
+        container_name: clickhouse-01-replica
+        ports:
+            - 9051:9000
+            - 8251:8123
+        volumes:
+                - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
+                - ./config/clickhouse_metrika_old.xml:/etc/clickhouse-server/metrika.xml
+                - ./config/macros/macros-01-replica.xml:/etc/clickhouse-server/config.d/macros.xml
+                - ./config/users.xml:/etc/clickhouse-server/users.xml
+                # - ./data/server-01:/var/lib/clickhouse
+        ulimits:
+            nofile:
+                soft: 262144
+                hard: 262144
+        depends_on:
+            - "clickhouse-zookeeper-01"
 
     # cluster_old
     clickhouse-02:
-        image: yandex/clickhouse-server:20.3
+        image: yandex/clickhouse-server:20.7
         hostname: clickhouse-02
         container_name: clickhouse-02
         ports:
@@ -67,11 +96,11 @@ services:
                 soft: 262144
                 hard: 262144
         depends_on:
-            - "clickhouse-zookeeper"
+            - "clickhouse-zookeeper-01"
 
     # cluster_new
     clickhouse-03:
-        image: yandex/clickhouse-server:21.8
+        image: clickhouse/clickhouse-server:21.8
         hostname: clickhouse-03
         container_name: clickhouse-03
         ports:
@@ -88,11 +117,32 @@ services:
                 soft: 262144
                 hard: 262144
         depends_on:
-            - "clickhouse-zookeeper"
+            - "clickhouse-zookeeper-02"
+	    
+    # cluster_new
+    clickhouse-03-replica:
+        image: clickhouse/clickhouse-server:21.8
+        hostname: clickhouse-03-replica
+        container_name: clickhouse-03-replica
+        ports:
+            - 9053:9000
+            - 8253:8123
+        volumes:
+                - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
+                - ./config/clickhouse_metrika_new.xml:/etc/clickhouse-server/metrika.xml
+                - ./config/macros/macros-03-replica.xml:/etc/clickhouse-server/config.d/macros.xml
+                - ./config/users.xml:/etc/clickhouse-server/users.xml
+                # - ./data/server-03:/var/lib/clickhouse
+        ulimits:
+            nofile:
+                soft: 262144
+                hard: 262144
+        depends_on:
+            - "clickhouse-zookeeper-02"
 
     #cluster_new
     clickhouse-04:
-        image: yandex/clickhouse-server:21.8
+        image: clickhouse/clickhouse-server:21.8
         hostname: clickhouse-04
         container_name: clickhouse-04
         ports:
@@ -109,11 +159,11 @@ services:
                 soft: 262144
                 hard: 262144
         depends_on:
-            - "clickhouse-zookeeper"
+            - "clickhouse-zookeeper-02"
 
     # query_old
     query-old:
-        image: yandex/clickhouse-server:20.3
+        image: yandex/clickhouse-server:20.7
         hostname: query-old
         container_name: query-old
         ports:
@@ -128,12 +178,10 @@ services:
             nofile:
                 soft: 262144
                 hard: 262144
-        depends_on:
-            - "clickhouse-zookeeper"
 
     # query_new
     query-new:
-        image: yandex/clickhouse-server:21.8
+        image: clickhouse/clickhouse-server:21.8
         hostname: query-new
         container_name: query-new
         ports:
@@ -148,17 +196,16 @@ services:
             nofile:
                 soft: 262144
                 hard: 262144
-        depends_on:
-            - "clickhouse-zookeeper"
+
 networks:
     default:
         name: sentry
 ```
 
 
-We have 6 clickhouse server container and one zookeeper container. They are created in the sentry network so Snuba can talk to the clsuter.
+We have 8 clickhouse server container and 2 zookeeper container. They are created in the sentry network so Snuba can talk to the clsuter.
 
-clickhouse-01 and clickhouse-02 are storage nodes for cluster-old. clickhouse-03 and clickhouse-04 are storage nodes for cluster-new. query-old is the query node for cluster-old and query-new is the query node for cluster-new.
+clickhouse-01 and clickhouse-01-replica are replicas of each other. Those two and clickhouse-02 are storage nodes for cluster-old. clickhouse-03 and clickhouse-03-replica are replicas of each other. Those two and clickhouse-04 are storage nodes for cluster-new. query-old is the query node for cluster-old and query-new is the query node for cluster-new.
 
 
 **To enable replication ZooKeeper is required. ClickHouse will take care of data consistency on all replicas and run restore procedure after failure automatically. It's recommended to deploy ZooKeeper cluster to separate servers.**
@@ -192,6 +239,10 @@ So lets see `metrika.xml` for cluster_old
 					<host>clickhouse-01</host>
 					<port>9000</port>
 				</replica>
+				<replica>
+					<host>clickhouse-01-replica</host>
+					<port>9000</port>
+				</replica>
 			</shard>
 			<shard>
 				<weight>1</weight>
@@ -205,7 +256,7 @@ So lets see `metrika.xml` for cluster_old
 	</clickhouse_remote_servers>
 	<zookeeper-servers>
 		<node index="1">
-			<host>clickhouse-zookeeper</host>
+			<host>clickhouse-zookeeper-01</host>
 			<port>2181</port>
 		</node>
 	</zookeeper-servers>
@@ -229,7 +280,6 @@ and macros.xml, each instances has there own macros settings, like server 1:
     <macros>
         <replica>clickhouse-01</replica>
         <shard>01</shard>
-        <layer>01</layer>
     </macros>
 </yandex>
 ```
