@@ -72,25 +72,6 @@ services:
         depends_on:
             - "clickhouse-zookeeper-01"
 
-    # clickhouse-02-replica:
-    #     image: yandex/clickhouse-server:20.7
-    #     hostname: clickhouse-02-replica
-    #     container_name: clickhouse-02-replica
-    #     ports:
-    #         - 9055:9000
-    #         - 8255:8123
-    #     volumes:
-    #             - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
-    #             - ./config/clickhouse_metrika.xml:/etc/clickhouse-server/metrika.xml
-    #             - ./config/macros/macros-02-replica.xml:/etc/clickhouse-server/config.d/macros.xml
-    #             - ./config/users.xml:/etc/clickhouse-server/users.xml
-    #             # - ./data/server-04:/var/lib/clickhouse
-    #     ulimits:
-    #         nofile:
-    #             soft: 262144
-    #             hard: 262144
-    #     depends_on:
-    #         - "clickhouse-zookeeper-01"
 
     # migrations cluster
     clickhouse-migrations-01:
@@ -127,7 +108,46 @@ services:
             nofile:
                 soft: 262144
                 hard: 262144
+        
+    custom:
+        build:
+            context: ~/snuba
+            dockerfile: Dockerfile
+        ports:
+            - "1218:1218"
+        environment:
+            SNUBA_SETTINGS: test_distributed_migrations
+            CLICKHOUSE_HOST: "query-old"
+            CLICKHOUSE_MIGRATIONS_HOST: "clickhouse-migrations-01"
+            CLICKHOUSE_DATABASE: "default"
+            REDIS_HOST: "172.28.0.1"
+    redis:
+        image: redis:5.0-alpine
+        ports:
+            - "6379:6379"
+
+
+    # clickhouse-02-replica:
+    #     image: yandex/clickhouse-server:20.7
+    #     hostname: clickhouse-02-replica
+    #     container_name: clickhouse-02-replica
+    #     ports:
+    #         - 9055:9000
+    #         - 8255:8123
+    #     volumes:
+    #             - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
+    #             - ./config/clickhouse_metrika.xml:/etc/clickhouse-server/metrika.xml
+    #             - ./config/macros/macros-02-replica.xml:/etc/clickhouse-server/config.d/macros.xml
+    #             - ./config/users.xml:/etc/clickhouse-server/users.xml
+    #             # - ./data/server-04:/var/lib/clickhouse
+    #     ulimits:
+    #         nofile:
+    #             soft: 262144
+    #             hard: 262144
+    #     depends_on:
+    #         - "clickhouse-zookeeper-01"
 
 networks:
     default:
-        name: sentry
+        name: clickhouse-setup-network
+        external: true
