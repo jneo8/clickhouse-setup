@@ -1,17 +1,20 @@
 ## New Replica Setup
 
-
-Make sure in Snuba to be using the distributed migrations setting
+Create the network
 
 ```shell
-export SNUBA_SETTINGS=distributed_migrations
+docker network create clickhouse-setup-network --subnet=172.28.0.0/16 --gateway=172.28.0.1
 ```
-
 
 Move into `new_replica` 
 
 ```shell
 cd examples/new_replica
+```
+
+Build the snuba image (you must be on the branch in snuba that you want to build the image for)
+```shell
+docker compose build
 ```
 
 Start the containers
@@ -20,28 +23,17 @@ Start the containers
 docker compose up -d
 ```
 
-You should now see the following containers running with the appropriate ports, if you uncommented the 2nd replica for shard 2, you would see that included as well.
+Go into the snuba container and run migrations for the system group and some other group
 
 ```shell
-12:13 $ docker ps
-CONTAINER ID   IMAGE                                                               COMMAND                  CREATED          STATUS          PORTS                                                                                            NAMES
-30db1f879177   9e956a841d2c                                                        "/entrypoint.sh"         19 seconds ago   Up 15 seconds   9009/tcp, 0.0.0.0:8252->8123/tcp, :::8252->8123/tcp, 0.0.0.0:9052->9000/tcp, :::9052->9000/tcp   clickhouse-01-replica
-09c26f83f962   9e956a841d2c                                                        "/entrypoint.sh"         19 seconds ago   Up 15 seconds   9009/tcp, 0.0.0.0:8251->8123/tcp, :::8251->8123/tcp, 0.0.0.0:9051->9000/tcp, :::9051->9000/tcp   clickhouse-01
-9a4a99ee7d8b   9e956a841d2c                                                        "/entrypoint.sh"         19 seconds ago   Up 15 seconds   9009/tcp, 0.0.0.0:8253->8123/tcp, :::8253->8123/tcp, 0.0.0.0:9053->9000/tcp, :::9053->9000/tcp   clickhouse-02
-d81237c56b39   9e956a841d2c                                                        "/entrypoint.sh"         19 seconds ago   Up 17 seconds   9009/tcp, 0.0.0.0:8254->8123/tcp, :::8254->8123/tcp, 0.0.0.0:9054->9000/tcp, :::9054->9000/tcp   clickhouse-migrations-01
-08e4e10d2eac   9e956a841d2c                                                        "/entrypoint.sh"         19 seconds ago   Up 17 seconds   9009/tcp, 0.0.0.0:8225->8123/tcp, :::8225->8123/tcp, 0.0.0.0:9005->9000/tcp, :::9005->9000/tcp   query-old
-eb3f1bf50341   3d526e752a54                                                        "/docker-entrypoint.…"   19 seconds ago   Up 17 seconds   2888/tcp, 3888/tcp, 0.0.0.0:2181-2182->2181-2182/tcp, :::2181-2182->2181-2182/tcp, 8080/tcp      clickhouse-zookeeper-01
+docker exec -it new_replica-custom-1 bash
 ```
-
-Now in snuba you can run the migrations command
 
 ```shell
-snuba migrations migrate --force
+snuba migrations migrate --force --group=system
+snuba migrations migrate --force --group=generic_metrics
 ```
 
-_COMING SOON should be the `--group` flag `snuba migrations migration --force --group=generic_metrics`_
-
-Now the migrations should have been run. 
 
 Let's check the migrations cluster:
 
