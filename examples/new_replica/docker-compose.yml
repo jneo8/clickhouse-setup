@@ -84,6 +84,7 @@ services:
         volumes:
                 - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
                 - ./config/clickhouse_metrika.xml:/etc/clickhouse-server/metrika.xml
+                - ./config/macros/macros-migrations-01.xml:/etc/clickhouse-server/config.d/macros.xml
                 - ./config/users.xml:/etc/clickhouse-server/users.xml
                 # - ./data/server-05:/var/lib/clickhouse
         ulimits:
