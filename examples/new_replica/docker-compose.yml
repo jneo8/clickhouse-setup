@@ -118,8 +118,7 @@ services:
             - "1218:1218"
         environment:
             SNUBA_SETTINGS: test_distributed_migrations
-            CLICKHOUSE_HOST: "query-old"
-            CLICKHOUSE_MIGRATIONS_HOST: "clickhouse-migrations-01"
+            CLICKHOUSE_HOST_MIGRATIONS: "query-old"
             CLICKHOUSE_DATABASE: "default"
             REDIS_HOST: "172.28.0.1"
     redis:
