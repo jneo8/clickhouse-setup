@@ -33,7 +33,7 @@
             <networks incl="networks" replace="replace">
                 <ip>::/0</ip>
             </networks>
-            <profile>default</profile>
+            <profile>readonly</profile>
             <quota>default</quota>
         </user1>
         <!-- If user name was not specified, 'default' user is used. -->
@@ -82,6 +82,7 @@
 
             <!-- Quota for user. -->
             <quota>default</quota>
+            <access_management>1</access_management>
         </default>
 
         <!-- Example of user with readonly access. -->
