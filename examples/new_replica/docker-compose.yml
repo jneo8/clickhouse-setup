@@ -114,6 +114,8 @@ services:
         build:
             context: ~/snuba
             dockerfile: Dockerfile
+            args:
+                - SHOULD_BUILD_RUST=false
         ports:
             - "1218:1218"
         environment:
