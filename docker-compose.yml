@@ -1,97 +1,58 @@
 version: '3'
 
 services:
-    clickhouse-zookeeper-01:
+    zookeeper-01:
         image: zookeeper
-        ports:
-            - "2181:2181"
-            - "2182:2182"
-        container_name: clickhouse-zookeeper-01
-        hostname: clickhouse-zookeeper-01
-
-    clickhouse-zookeeper-02:
-        image: zookeeper
+        restart: always
         ports:
             - "2281:2181"
             - "2282:2182"
-        container_name: clickhouse-zookeeper-02
-        hostname: clickhouse-zookeeper-02
+        container_name: zookeeper-01
+        hostname: zookeeper-01
+        environment:
+            ZOO_MY_ID: 1
+            ZOO_SERVERS: server.1=zookeeper-01:2888:3888;2181 server.2=zookeeper-02:2888:3888;2181 server.3=zookeeper-03:2888:3888;2181
+            ZOO_4LW_COMMANDS_WHITELIST: srvr,stat,mntr
 
-    # cluster_old
-    clickhouse-01:
-        image: yandex/clickhouse-server:20.7
-        hostname: clickhouse-01
-        container_name: clickhouse-01
-        ports:
-            - 9001:9000
-            - 8221:8123
-        volumes:
-                - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
-                - ./config/clickhouse_metrika_old.xml:/etc/clickhouse-server/metrika.xml
-                - ./config/macros/macros-01.xml:/etc/clickhouse-server/config.d/macros.xml
-                - ./config/users.xml:/etc/clickhouse-server/users.xml
-                # - ./data/server-01:/var/lib/clickhouse
-        ulimits:
-            nofile:
-                soft: 262144
-                hard: 262144
-        depends_on:
-            - "clickhouse-zookeeper-01"
 
-    # cluster_old
-    clickhouse-01-replica:
-        image: yandex/clickhouse-server:20.7
-        hostname: clickhouse-01-replica
-        container_name: clickhouse-01-replica
+    zookeeper-02:
+        image: zookeeper
+        restart: always
         ports:
-            - 9051:9000
-            - 8251:8123
-        volumes:
-                - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
-                - ./config/clickhouse_metrika_old.xml:/etc/clickhouse-server/metrika.xml
-                - ./config/macros/macros-01-replica.xml:/etc/clickhouse-server/config.d/macros.xml
-                - ./config/users.xml:/etc/clickhouse-server/users.xml
-                # - ./data/server-01:/var/lib/clickhouse
-        ulimits:
-            nofile:
-                soft: 262144
-                hard: 262144
-        depends_on:
-            - "clickhouse-zookeeper-01"
+            - "2283:2181"
+            - "2284:2182"
+        container_name: zookeeper-02
+        hostname: zookeeper-02
+        environment:
+            ZOO_MY_ID: 2
+            ZOO_SERVERS: server.1=zookeeper-01:2888:3888;2181 server.2=zookeeper-02:2888:3888;2181 server.3=zookeeper-03:2888:3888;2181 
+            ZOO_4LW_COMMANDS_WHITELIST: srvr,stat,mntr
 
-    # cluster_old
-    clickhouse-02:
-        image: yandex/clickhouse-server:20.7
-        hostname: clickhouse-02
-        container_name: clickhouse-02
+    zookeeper-03:
+        image: zookeeper
+        restart: always
         ports:
-            - 9002:9000
-            - 8222:8123
-        volumes:
-                - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
-                - ./config/clickhouse_metrika_old.xml:/etc/clickhouse-server/metrika.xml
-                - ./config/macros/macros-02.xml:/etc/clickhouse-server/config.d/macros.xml
-                - ./config/users.xml:/etc/clickhouse-server/users.xml
-                # - ./data/server-02:/var/lib/clickhouse
-        ulimits:
-            nofile:
-                soft: 262144
-                hard: 262144
-        depends_on:
-            - "clickhouse-zookeeper-01"
+            - "2285:2181"
+            - "2286:2182"
+        container_name: zookeeper-03
+        hostname: zookeeper-03
+        environment:
+            ZOO_MY_ID: 3
+            ZOO_SERVERS: server.1=zookeeper-01:2888:3888;2181 server.2=zookeeper-02:2888:3888;2181 server.3=zookeeper-03:2888:3888;2181 
+            ZOO_4LW_COMMANDS_WHITELIST: srvr,stat,mntr
 
     # cluster_new
-    clickhouse-03:
+    storage-01:
         image: clickhouse/clickhouse-server:21.8
-        hostname: clickhouse-03
-        container_name: clickhouse-03
+        hostname: storage-01
+        container_name: storage-01
         ports:
-            - 9003:9000
-            - 8223:8123
+            - 9013:9000
+            - 8013:8123
         volumes:
                 - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
-                - ./config/clickhouse_metrika_new.xml:/etc/clickhouse-server/metrika.xml
-                - ./config/macros/macros-03.xml:/etc/clickhouse-server/config.d/macros.xml
+                - ./config/storage.xml:/etc/clickhouse-server/metrika.xml
+                - ./config/macros/storage-01.xml:/etc/clickhouse-server/config.d/macros.xml
                 - ./config/users.xml:/etc/clickhouse-server/users.xml
                 # - ./data/server-03:/var/lib/clickhouse
         ulimits:
@@ -99,20 +60,22 @@ services:
                 soft: 262144
                 hard: 262144
         depends_on:
-            - "clickhouse-zookeeper-02"
+            - "zookeeper-01"
+            - "zookeeper-02"
+            - "zookeeper-03"
 
     # cluster_new
-    clickhouse-03-replica:
+    storage-02:
         image: clickhouse/clickhouse-server:21.8
-        hostname: clickhouse-03-replica
-        container_name: clickhouse-03-replica
+        hostname: storage-02
+        container_name: storage-02
         ports:
-            - 9053:9000
-            - 8253:8123
+            - 9023:9000
+            - 8023:8123
         volumes:
                 - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
-                - ./config/clickhouse_metrika_new.xml:/etc/clickhouse-server/metrika.xml
-                - ./config/macros/macros-03-replica.xml:/etc/clickhouse-server/config.d/macros.xml
+                - ./config/storage.xml:/etc/clickhouse-server/metrika.xml
+                - ./config/macros/storage-02.xml:/etc/clickhouse-server/config.d/macros.xml
                 - ./config/users.xml:/etc/clickhouse-server/users.xml
                 # - ./data/server-03:/var/lib/clickhouse
         ulimits:
@@ -120,64 +83,57 @@ services:
                 soft: 262144
                 hard: 262144
         depends_on:
-            - "clickhouse-zookeeper-02"
+            - "zookeeper-01"
+            - "zookeeper-02"
+            - "zookeeper-03"
 
-    #cluster_new
-    clickhouse-04:
+    storage-03:
         image: clickhouse/clickhouse-server:21.8
-        hostname: clickhouse-04
-        container_name: clickhouse-04
+        hostname: storage-03
+        container_name: storage-03
         ports:
-            - 9004:9000
-            - 8224:8123
+            - 9033:9000
+            - 8033:8123
         volumes:
                 - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
-                - ./config/clickhouse_metrika_new.xml:/etc/clickhouse-server/metrika.xml
-                - ./config/macros/macros-04.xml:/etc/clickhouse-server/config.d/macros.xml
+                - ./config/storage.xml:/etc/clickhouse-server/metrika.xml
+                - ./config/macros/storage-03.xml:/etc/clickhouse-server/config.d/macros.xml
                 - ./config/users.xml:/etc/clickhouse-server/users.xml
-                # - ./data/server-04:/var/lib/clickhouse
+                # - ./data/server-03:/var/lib/clickhouse
         ulimits:
             nofile:
                 soft: 262144
                 hard: 262144
         depends_on:
-            - "clickhouse-zookeeper-02"
-
-    # query_old
-    query-old:
-        image: yandex/clickhouse-server:20.7
-        hostname: query-old
-        container_name: query-old
-        ports:
-            - 9005:9000
-            - 8225:8123
-        volumes:
-                - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
-                - ./config/clickhouse_metrika_old.xml:/etc/clickhouse-server/metrika.xml
-                - ./config/users.xml:/etc/clickhouse-server/users.xml
-                # - ./data/server-05:/var/lib/clickhouse
-        ulimits:
-            nofile:
-                soft: 262144
-                hard: 262144
+            - "zookeeper-01"
+            - "zookeeper-02"
+            - "zookeeper-03"
 
     # query_new
-    query-new:
+    query-1:
         image: clickhouse/clickhouse-server:21.8
-        hostname: query-new
-        container_name: query-new
+        hostname: query-01
+        container_name: query-01
         ports:
-            - 9006:9000
-            - 8226:8123
+            - 9113:9000
+            - 8123:8123
         volumes:
                 - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
-                - ./config/clickhouse_metrika_new.xml:/etc/clickhouse-server/metrika.xml
+                - ./config/query.xml:/etc/clickhouse-server/metrika.xml
+                - ./config/macros/query-01.xml:/etc/clickhouse-server/config.d/macros.xml
                 - ./config/users.xml:/etc/clickhouse-server/users.xml
                 # - ./data/server-06:/var/lib/clickhouse
         ulimits:
             nofile:
                 soft: 262144
                 hard: 262144
+        depends_on:
+            - "zookeeper-01"
+            - "zookeeper-02"
+            - "zookeeper-03"
+            - 'storage-01'
+            - 'storage-02'
+            - 'storage-03'
 
 networks:
     default:
