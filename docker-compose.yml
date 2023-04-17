@@ -2,6 +2,9 @@ version: '3'
 
 services:
     zookeeper-01:
+        networks:
+          - zk
+          - zk2
         image: zookeeper
         restart: always
         ports:
@@ -13,9 +16,13 @@ services:
             ZOO_MY_ID: 1
             ZOO_SERVERS: server.1=zookeeper-01:2888:3888;2181 server.2=zookeeper-02:2888:3888;2181 server.3=zookeeper-03:2888:3888;2181
             ZOO_4LW_COMMANDS_WHITELIST: srvr,stat,mntr
+            ZOO_CFG_EXTRA: zookeeper_current_node_hostname=0.0.0.0
 
 
     zookeeper-02:
+        networks:
+          - zk
+          - zk2
         image: zookeeper
         restart: always
         ports:
@@ -27,8 +34,12 @@ services:
             ZOO_MY_ID: 2
             ZOO_SERVERS: server.1=zookeeper-01:2888:3888;2181 server.2=zookeeper-02:2888:3888;2181 server.3=zookeeper-03:2888:3888;2181 
             ZOO_4LW_COMMANDS_WHITELIST: srvr,stat,mntr
+            ZOO_CFG_EXTRA: zookeeper_current_node_hostname=0.0.0.0
 
     zookeeper-03:
+        networks:
+          - zk
+          - zk2
         image: zookeeper
         restart: always
         ports:
@@ -40,9 +51,15 @@ services:
             ZOO_MY_ID: 3
             ZOO_SERVERS: server.1=zookeeper-01:2888:3888;2181 server.2=zookeeper-02:2888:3888;2181 server.3=zookeeper-03:2888:3888;2181 
             ZOO_4LW_COMMANDS_WHITELIST: srvr,stat,mntr
+            ZOO_CFG_EXTRA: zookeeper_current_node_hostname=0.0.0.0
 
     # cluster_new
     storage-01:
+        networks:
+          - zk2
+          - storage
+          - sta
+        #   - querya
         image: clickhouse/clickhouse-server:21.8
         hostname: storage-01
         container_name: storage-01
@@ -66,6 +83,11 @@ services:
 
     # cluster_new
     storage-02:
+        networks:
+          - zk
+          - storage
+          - stb
+        #   - queryb
         image: clickhouse/clickhouse-server:21.8
         hostname: storage-02
         container_name: storage-02
@@ -88,6 +110,11 @@ services:
             - "zookeeper-03"
 
     storage-03:
+        networks:
+          - zk
+          - storage
+          - stc
+        #   - queryc
         image: clickhouse/clickhouse-server:21.8
         hostname: storage-03
         container_name: storage-03
@@ -109,8 +136,12 @@ services:
             - "zookeeper-02"
             - "zookeeper-03"
 
-    # query_new
     query-1:
+        networks:
+          - sta
+          - stb
+          - stc
+        #   - query
         image: clickhouse/clickhouse-server:21.8
         hostname: query-01
         container_name: query-01
@@ -134,7 +165,17 @@ services:
             - 'storage-01'
             - 'storage-02'
             - 'storage-03'
-
 networks:
-    default:
-        name: sentry
+    sta:
+     name: sta
+    stb:
+     name: stb
+    stc:
+     name: stc
+    storage:
+     name: storage
+    zk:
+     name: zk
+    zk2:
+     name: zk2
+      

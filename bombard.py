@@ -9,4 +9,4 @@ query: str = f"insert into errors_dist values ({PROJECT_ID}, now(), {DELETED}, g
 
 while True:
     print(requests.post(f"http://localhost:8123/?query={query}"))
-    time.sleep(0.1)
+    time.sleep(1.0)

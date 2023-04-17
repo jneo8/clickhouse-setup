@@ -27,7 +27,7 @@
 			</shard>
         </query>
 	</clickhouse_remote_servers>
-	<zookeeper-servers>
+	<!-- <zookeeper-servers>
 		<node index="1">
 			<host>zookeeper-01</host>
 			<port>2181</port>
@@ -40,7 +40,7 @@
 			<host>zookeeper-03</host>
 			<port>2181</port>
 		</node>
-	</zookeeper-servers>
+	</zookeeper-servers> -->
 	<networks>
 		<ip>::/0</ip>
 	</networks>
