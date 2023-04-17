@@ -3,7 +3,7 @@ version: '3'
 services:
     zookeeper-01:
         networks:
-          - zk
+          - zk1
           - zk2
         image: zookeeper
         restart: always
@@ -21,7 +21,7 @@ services:
 
     zookeeper-02:
         networks:
-          - zk
+          - zk1
           - zk2
         image: zookeeper
         restart: always
@@ -38,7 +38,7 @@ services:
 
     zookeeper-03:
         networks:
-          - zk
+          - zk1
           - zk2
         image: zookeeper
         restart: always
@@ -58,7 +58,7 @@ services:
         networks:
           - zk2
           - storage
-          - sta
+          - st2
         #   - querya
         image: clickhouse/clickhouse-server:21.8
         hostname: storage-01
@@ -84,9 +84,9 @@ services:
     # cluster_new
     storage-02:
         networks:
-          - zk
+          - zk1
           - storage
-          - stb
+          - st1
         #   - queryb
         image: clickhouse/clickhouse-server:21.8
         hostname: storage-02
@@ -111,9 +111,9 @@ services:
 
     storage-03:
         networks:
-          - zk
+          - zk1
           - storage
-          - stc
+          - st1
         #   - queryc
         image: clickhouse/clickhouse-server:21.8
         hostname: storage-03
@@ -138,9 +138,8 @@ services:
 
     query-1:
         networks:
-          - sta
-          - stb
-          - stc
+          - st1
+          - st2
         #   - query
         image: clickhouse/clickhouse-server:21.8
         hostname: query-01
@@ -166,16 +165,14 @@ services:
             - 'storage-02'
             - 'storage-03'
 networks:
-    sta:
-     name: sta
-    stb:
-     name: stb
-    stc:
-     name: stc
+    st1:
+     name: st1
+    st2:
+     name: st2
     storage:
      name: storage
-    zk:
-     name: zk
+    zk1:
+     name: zk1
     zk2:
      name: zk2
       
