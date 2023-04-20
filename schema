@@ -1,4 +1,5 @@
-CREATE TABLE default.errors_local
+CREATE TABLE IF NOT EXISTS default.errors_local
+ON CLUSTER storage
 (
     `project_id` UInt64,
     `timestamp` DateTime,
