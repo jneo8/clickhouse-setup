@@ -2,9 +2,6 @@ version: '3'
 
 services:
     zookeeper-01:
-        networks:
-          - zk1
-          - zk2
         image: zookeeper
         restart: always
         ports:
@@ -20,9 +17,6 @@ services:
 
 
     zookeeper-02:
-        networks:
-          - zk1
-          - zk2
         image: zookeeper
         restart: always
         ports:
@@ -37,9 +31,6 @@ services:
             ZOO_CFG_EXTRA: zookeeper_current_node_hostname=0.0.0.0
 
     zookeeper-03:
-        networks:
-          - zk1
-          - zk2
         image: zookeeper
         restart: always
         ports:
@@ -55,12 +46,7 @@ services:
 
     # cluster_new
     storage-01:
-        networks:
-          - zk2
-          - storage
-          - st2
-        #   - querya
-        image: clickhouse/clickhouse-server:21.8
+        image: altinity/clickhouse-server:22.8.15.25.altinitystable
         hostname: storage-01
         container_name: storage-01
         ports:
@@ -83,11 +69,6 @@ services:
 
     # cluster_new
     storage-02:
-        networks:
-          - zk1
-          - storage
-          - st1
-        #   - queryb
         image: clickhouse/clickhouse-server:21.8
         hostname: storage-02
         container_name: storage-02
@@ -110,11 +91,6 @@ services:
             - "zookeeper-03"
 
     storage-03:
-        networks:
-          - zk1
-          - storage
-          - st1
-        #   - queryc
         image: clickhouse/clickhouse-server:21.8
         hostname: storage-03
         container_name: storage-03
@@ -137,10 +113,6 @@ services:
             - "zookeeper-03"
 
     query-1:
-        networks:
-          - st1
-          - st2
-        #   - query
         image: clickhouse/clickhouse-server:21.8
         hostname: query-01
         container_name: query-01
@@ -164,15 +136,27 @@ services:
             - 'storage-01'
             - 'storage-02'
             - 'storage-03'
-networks:
-    st1:
-     name: st1
-    st2:
-     name: st2
-    storage:
-     name: storage
-    zk1:
-     name: zk1
-    zk2:
-     name: zk2
-      
+    query-2:
+        image: altinity/clickhouse-server:22.8.15.25.altinitystable
+        hostname: query-02
+        container_name: query-02
+        ports:
+            - 9114:9000
+            - 8124:8123
+        volumes:
+                - ./config/clickhouse_config.xml:/etc/clickhouse-server/config.xml
+                - ./config/query.xml:/etc/clickhouse-server/metrika.xml
+                - ./config/macros/query-01.xml:/etc/clickhouse-server/config.d/macros.xml
+                - ./config/users.xml:/etc/clickhouse-server/users.xml
+                # - ./data/server-06:/var/lib/clickhouse
+        ulimits:
+            nofile:
+                soft: 262144
+                hard: 262144
+        depends_on:
+            - "zookeeper-01"
+            - "zookeeper-02"
+            - "zookeeper-03"
+            - 'storage-01'
+            - 'storage-02'
+            - 'storage-03'
