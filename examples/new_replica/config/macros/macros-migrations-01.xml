@@ -1,6 +1,0 @@
-<yandex>
-    <macros>
-        <replica>clickhouse-migrations-01</replica>
-        <shard>01</shard>
-    </macros>
-</yandex>
