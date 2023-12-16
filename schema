@@ -1,0 +1,26 @@
+CREATE TABLE IF NOT EXISTS default.errors_local
+ON CLUSTER storage
+(
+    `project_id` UInt64,
+    `timestamp` DateTime,
+    `deleted` UInt8,
+    `event_id` UUID CODEC(NONE),
+    `retention_days` UInt16
+)
+ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/errors/{shard}/errors_local', '{replica}', deleted)
+PARTITION BY (retention_days, toMonday(timestamp))
+ORDER BY (project_id, toStartOfDay(timestamp), cityHash64(event_id))
+SAMPLE BY cityHash64(event_id)
+TTL timestamp + toIntervalDay(retention_days)
+SETTINGS index_granularity = 8192, min_bytes_for_wide_part = 1, enable_vertical_merge_algorithm = 1, min_rows_for_wide_part = 0, ttl_only_drop_parts = 1
+
+
+CREATE TABLE default.errors_dist
+(
+    `project_id` UInt64,
+    `timestamp` DateTime,
+    `deleted` UInt8,
+    `event_id` UUID CODEC(NONE),
+    `retention_days` UInt16
+)
+ENGINE = Distributed('storage', 'default', 'errors_local', cityHash64(event_id))
