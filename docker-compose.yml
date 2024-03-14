@@ -19,7 +19,7 @@ services:
 
     # cluster_old
     clickhouse-01:
-        image: clickhouse/clickhouse-server:21.8.15.7
+        image: clickhouse/clickhouse-server:22.8
         hostname: clickhouse-01
         container_name: clickhouse-01
         ports:
@@ -40,7 +40,7 @@ services:
 
     # cluster_old
     clickhouse-01-replica:
-        image: clickhouse/clickhouse-server:21.8.15.7
+        image: clickhouse/clickhouse-server:22.8
         hostname: clickhouse-01-replica
         container_name: clickhouse-01-replica
         ports:
@@ -61,7 +61,7 @@ services:
 
     # cluster_old
     clickhouse-02:
-        image: clickhouse/clickhouse-server:21.8.15.7
+        image: clickhouse/clickhouse-server:22.8
         hostname: clickhouse-02
         container_name: clickhouse-02
         ports:
@@ -145,7 +145,7 @@ services:
 
     # query_old
     query-old:
-        image: clickhouse/clickhouse-server:21.8.15.7
+        image: clickhouse/clickhouse-server:22.8
         hostname: query-old
         container_name: query-old
         ports:
