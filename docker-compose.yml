@@ -19,7 +19,7 @@ services:
 
     # cluster_old
     clickhouse-01:
-        image: yandex/clickhouse-server:20.7
+        image: clickhouse/clickhouse-server:21.8.15.7
         hostname: clickhouse-01
         container_name: clickhouse-01
         ports:
@@ -40,7 +40,7 @@ services:
 
     # cluster_old
     clickhouse-01-replica:
-        image: yandex/clickhouse-server:20.7
+        image: clickhouse/clickhouse-server:21.8.15.7
         hostname: clickhouse-01-replica
         container_name: clickhouse-01-replica
         ports:
@@ -61,7 +61,7 @@ services:
 
     # cluster_old
     clickhouse-02:
-        image: yandex/clickhouse-server:20.7
+        image: clickhouse/clickhouse-server:21.8.15.7
         hostname: clickhouse-02
         container_name: clickhouse-02
         ports:
@@ -82,7 +82,7 @@ services:
 
     # cluster_new
     clickhouse-03:
-        image: clickhouse/clickhouse-server:21.8
+        image: clickhouse/clickhouse-server:22.8
         hostname: clickhouse-03
         container_name: clickhouse-03
         ports:
@@ -103,7 +103,7 @@ services:
 
     # cluster_new
     clickhouse-03-replica:
-        image: clickhouse/clickhouse-server:21.8
+        image: clickhouse/clickhouse-server:22.8
         hostname: clickhouse-03-replica
         container_name: clickhouse-03-replica
         ports:
@@ -124,7 +124,7 @@ services:
 
     #cluster_new
     clickhouse-04:
-        image: clickhouse/clickhouse-server:21.8
+        image: clickhouse/clickhouse-server:22.8
         hostname: clickhouse-04
         container_name: clickhouse-04
         ports:
@@ -145,7 +145,7 @@ services:
 
     # query_old
     query-old:
-        image: yandex/clickhouse-server:20.7
+        image: clickhouse/clickhouse-server:21.8.15.7
         hostname: query-old
         container_name: query-old
         ports:
@@ -163,7 +163,7 @@ services:
 
     # query_new
     query-new:
-        image: clickhouse/clickhouse-server:21.8
+        image: clickhouse/clickhouse-server:22.8
         hostname: query-new
         container_name: query-new
         ports:
